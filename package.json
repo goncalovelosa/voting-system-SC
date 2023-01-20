@@ -1,0 +1,63 @@
+{
+  "name": "voting-system-sc",
+  "version": "1.0.0",
+  "description": "Electronic Voting System in solidity",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "typechain": "hardhat typechain",
+    "sizer": "hardhat size-contracts",
+    "lint": "npm run lint:sol && npm run lint:ts",
+    "lint:sol": "solhint \"contracts/**/*.sol\"",
+    "lint:ts": "eslint --ext .js,.ts .",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goncalovelosa/voting-system-SC.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "OSL",
+  "bugs": {
+    "url": "https://github.com/goncalovelosa/voting-system-SC/issues"
+  },
+  "homepage": "https://github.com/goncalovelosa/voting-system-SC#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1",
+    "@typechain/ethers-v5": "^10.2.0",
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
+    "chai": "^4.3.7",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.12.6",
+    "hardhat-contract-sizer": "^2.7.0",
+    "lint-staged": "^13.1.0",
+    "prettier": "^2.8.3",
+    "prettier-plugin-solidity": "^1.1.1",
+    "solhint": "^3.3.8",
+    "solhint-plugin-prettier": "^0.0.5",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.1.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1",
+    "@openzeppelin/contracts-upgradeable": "^4.8.1",
+    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "axios": "^1.2.3"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache",
+    "*.sol": "solhint",
+    "*.{js,ts,sol,md,json}": "prettier --write"
+  }
+}
