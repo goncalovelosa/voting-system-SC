@@ -95,7 +95,9 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @return The id of the voter
      * @return True if the voter has voted
      */
-    function getVoter(address _voterAddress) public view override returns (string memory, string memory, bool) {
+    function getVoter(
+        address _voterAddress
+    ) public view override onlyRole(DEFAULT_ADMIN_ROLE) returns (string memory, string memory, bool) {
         return (voters[_voterAddress].name, voters[_voterAddress].id, voters[_voterAddress].voted);
     }
 
