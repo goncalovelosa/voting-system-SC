@@ -14,6 +14,9 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     address[] private candidatesList;
     Period private votingPeriod;
 
+    bytes32 public constant CAMPAIN_MANAGER = keccak256("CAMPAIN_MANAGER");
+    bytes32 public constant VOTING_TABLE = keccak256("VOTING_TABLE");
+
     /**
      * @notice Initializes Election contract.
      * @dev Only called on initialization.
@@ -21,6 +24,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     function initialize() public initializer {
         __Pausable_init();
         __AccessControl_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -29,7 +33,10 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @param _id The id of the voter
      * @return True if the voter is registered
      */
-    function registerVoter(string memory _name, string memory _id) public override whenNotPaused returns (bool) {
+    function registerVoter(
+        string memory _name,
+        string memory _id
+    ) public override onlyRole(VOTING_TABLE) whenNotPaused returns (bool) {
         require(voters[msg.sender].voted == false, "Voter already registered");
         voters[msg.sender] = Voter(_name, _id, false);
         votersList.push(msg.sender);
@@ -64,7 +71,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     function registerCandidate(
         string memory _name,
         address _candidateAddress
-    ) public override whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) returns (bool) {
+    ) public override whenNotPaused onlyRole(CAMPAIN_MANAGER) returns (bool) {
         require(candidates[_candidateAddress].votes == 0, "Candidate already registered");
         candidates[_candidateAddress] = Candidate(_name, 0);
         candidatesList.push(_candidateAddress);
@@ -97,7 +104,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      */
     function getVoter(
         address _voterAddress
-    ) public view override onlyRole(DEFAULT_ADMIN_ROLE) returns (string memory, string memory, bool) {
+    ) public view override onlyRole(CAMPAIN_MANAGER) returns (string memory, string memory, bool) {
         return (voters[_voterAddress].name, voters[_voterAddress].id, voters[_voterAddress].voted);
     }
 
@@ -115,7 +122,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @notice Gets the voters list
      * @return The list of voters
      */
-    function getVoters() public view returns (address[] memory) {
+    function getVoters() public view onlyRole(CAMPAIN_MANAGER) returns (address[] memory) {
         return votersList;
     }
 
@@ -131,7 +138,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @notice Gets the number of voters
      * @return The number of voters
      */
-    function getVoterCount() public view returns (uint256) {
+    function getVoterCount() public view onlyRole(CAMPAIN_MANAGER) returns (uint256) {
         return votersList.length;
     }
 
