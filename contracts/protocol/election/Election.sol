@@ -5,9 +5,9 @@ pragma solidity ^0.8.19;
 import "../interfaces/IElection.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import { ERC2771ContextUpgradeable, ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 
-contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, ERC2981 {
+contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, ERC2771ContextUpgradeable {
     mapping(address => Voter) private voters;
     mapping(address => Candidate) private candidates;
     address[] private votersList;
@@ -15,16 +15,38 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     Period private votingPeriod;
 
     bytes32 public constant CAMPAIN_MANAGER = keccak256("CAMPAIN_MANAGER");
-    bytes32 public constant VOTING_TABLE = keccak256("VOTING_TABLE");
+    bytes32 public constant VOTING_MANAGER = keccak256("VOTING_MANAGER");
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(address _trustedForwarder) ERC2771ContextUpgradeable(_trustedForwarder) {
+        _disableInitializers();
+    }
 
     /**
      * @notice Initializes Election contract.
      * @dev Only called on initialization.
      */
-    function initialize() public initializer {
+    function initialize(ElectionInitData calldata _initData) public initializer {
         __Pausable_init();
         __AccessControl_init();
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        require(_initData.campainManagers.length > 0, "At least one campain manager is required");
+        for (uint256 i = 0; i < _initData.campainManagers.length; i++) {
+            _grantRole(CAMPAIN_MANAGER, _initData.campainManagers[i]);
+        }
+        require(_initData.votingManagers.length > 0, "At least one voting manager is required");
+        for (uint256 i = 0; i < _initData.votingManagers.length; i++) {
+            _grantRole(VOTING_MANAGER, _initData.votingManagers[i]);
+        }
+        require(_initData.start < _initData.end, "Start date must be before end date");
+        _setVotingPeriod(_initData.start, _initData.end);
+    }
+
+    /**
+     * @notice Sets the voting period
+     */
+    function setVotingPeriod(uint32 _start, uint32 _end) external onlyRole(CAMPAIN_MANAGER) {
+        _setVotingPeriod(_start, _end);
     }
 
     /**
@@ -36,11 +58,13 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     function registerVoter(
         string memory _name,
         string memory _id
-    ) public override onlyRole(VOTING_TABLE) whenNotPaused returns (bool) {
-        require(voters[msg.sender].voted == false, "Voter already registered");
-        voters[msg.sender] = Voter(_name, _id, false);
-        votersList.push(msg.sender);
-        emit VoterRegistered(msg.sender, _name, _id);
+    ) external override onlyRole(VOTING_MANAGER) whenNotPaused returns (bool) {
+        require(voters[_msgSender()].voted == false, "Voter already registered");
+        require(bytes(_name).length > 0, "Voter name cannot be empty");
+        require(bytes(_id).length > 0, "Voter id cannot be empty");
+        voters[_msgSender()] = Voter(_name, _id, false);
+        votersList.push(_msgSender());
+        emit VoterRegistered(_msgSender(), _name, _id);
         return true;
     }
 
@@ -49,16 +73,16 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @param _candidateAddress The address of the candidate
      * @return True if the vote is casted
      */
-    function vote(address _candidateAddress) public override whenNotPaused returns (bool) {
-        require(voters[msg.sender].voted == false, "Voter already voted");
+    function vote(address _candidateAddress) external override whenNotPaused returns (bool) {
+        require(voters[_msgSender()].voted == false, "Voter already voted");
         require(candidates[_candidateAddress].votes > 0, "Candidate not registered");
         require(
-            block.timestamp >= votingPeriod.start && block.timestamp <= votingPeriod.end,
+            votingPeriod.start < block.timestamp && votingPeriod.end > block.timestamp,
             "Voting period not started or ended"
         );
-        voters[msg.sender].voted = true;
+        voters[_msgSender()].voted = true;
         candidates[_candidateAddress].votes++;
-        emit Voted(msg.sender, _candidateAddress);
+        emit Voted(_msgSender(), _candidateAddress);
         return true;
     }
 
@@ -71,8 +95,11 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
     function registerCandidate(
         string memory _name,
         address _candidateAddress
-    ) public override whenNotPaused onlyRole(CAMPAIN_MANAGER) returns (bool) {
+    ) external override whenNotPaused onlyRole(CAMPAIN_MANAGER) returns (bool) {
         require(candidates[_candidateAddress].votes == 0, "Candidate already registered");
+        require(_candidateAddress != address(0), "Candidate address cannot be 0");
+        require(bytes(_name).length > 0, "Candidate name cannot be empty");
+        require(block.timestamp < votingPeriod.start, "Voting period already started");
         candidates[_candidateAddress] = Candidate(_name, 0);
         candidatesList.push(_candidateAddress);
         emit CandidateRegistered(_candidateAddress, _name);
@@ -81,18 +108,16 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Gets the winner of the election
-     * @return The address of the winner
+     * @return winner The address of the winner
      */
-    function getWinner() public view override returns (address) {
+    function getWinner() public view override returns (address winner) {
         uint256 maxVotes = 0;
-        address winner;
         for (uint256 i = 0; i < candidatesList.length; i++) {
             if (candidates[candidatesList[i]].votes > maxVotes) {
                 maxVotes = candidates[candidatesList[i]].votes;
                 winner = candidatesList[i];
             }
         }
-        return winner;
     }
 
     /**
@@ -151,17 +176,22 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
         return (votingPeriod.start, votingPeriod.end);
     }
 
-    /**
-     * @notice Sets the voting period
-     */
-    function setVotingPeriod(uint32 _start, uint32 _end) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControlUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function _setVotingPeriod(uint32 _start, uint32 _end) internal {
         votingPeriod = Period(_start, _end);
         emit VotingPeriodSet(_start, _end);
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC2981, AccessControlUpgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    function _msgSender() internal view override(ERC2771ContextUpgradeable, ContextUpgradeable) returns (address) {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    function _msgData() internal view override(ERC2771ContextUpgradeable, ContextUpgradeable) returns (bytes calldata) {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }
