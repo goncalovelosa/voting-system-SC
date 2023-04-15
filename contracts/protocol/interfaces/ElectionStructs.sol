@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
-interface Structs {
+interface ElectionStructs {
     struct ElectionInitData {
         address[] campainManagers;
         address[] votingManagers;

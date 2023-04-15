@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
-import "../interfaces/Structs.sol";
+import "../interfaces/ElectionStructs.sol";
 
-interface IElection is Structs {
+interface IElection is ElectionStructs {
     /**
      * @notice Emitted when a voter is registered
      */

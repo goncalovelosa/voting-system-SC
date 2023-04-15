@@ -10,7 +10,7 @@ const alchemyKey = process.env.ALCHEMY_API_KEY
 const config = {
   defaultNetwork: 'hardhat',
   solidity: {
-    version: '0.8.19',
+    version: '0.8.18',
     settings: {
       optimizer: {
         enabled: true,

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
-import { Structs } from "./Structs.sol";
+import { ElectionStructs } from "./ElectionStructs.sol";
 
 interface IElectionsFactory {
-    function createElection(Structs.ElectionInitData calldata _initData) external returns (address);
+    function createElection(ElectionStructs.ElectionInitData calldata _initData) external returns (address);
 
     function setElectionImplementation(address _electionImplementation) external;
 
