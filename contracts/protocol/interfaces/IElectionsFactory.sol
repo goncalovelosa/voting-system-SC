@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { ElectionStructs } from "./ElectionStructs.sol";
+import { ElectionStructs } from "../ElectionStructs.sol";
 
 interface IElectionsFactory {
     function createElection(ElectionStructs.ElectionInitData calldata _initData) external returns (address);

@@ -30,6 +30,8 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
         __Pausable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+
+        _setRoleAdmin(VOTING_MANAGER, CAMPAIN_MANAGER);
         require(_initData.campainManagers.length > 0, "At least one campain manager is required");
         for (uint256 i = 0; i < _initData.campainManagers.length; i++) {
             _grantRole(CAMPAIN_MANAGER, _initData.campainManagers[i]);
