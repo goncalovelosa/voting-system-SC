@@ -26,7 +26,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
      * @notice Initializes Election contract.
      * @dev Only called on initialization.
      */
-    function initialize(ElectionInitData calldata _initData) public initializer {
+    function initialize(ElectionInitData calldata _initData) external initializer {
         __Pausable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -46,6 +46,9 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Sets the voting period
+     * @dev Only the campain manager can call this function
+     * @param _start The start of the voting period
+     * @param _end The end of the voting period
      */
     function setVotingPeriod(uint32 _start, uint32 _end) external onlyRole(CAMPAIN_MANAGER) {
         _setVotingPeriod(_start, _end);
@@ -72,6 +75,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Votes for a candidate
+     * @dev Can only vote if not paused
      * @param _candidateAddress The address of the candidate
      * @return True if the vote is casted
      */
@@ -90,6 +94,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Registers a candidate
+     * @dev Only the campain manager can call this function
      * @param _name The name of the candidate
      * @param _candidateAddress The address of the candidate
      * @return True if the candidate is registered
@@ -124,6 +129,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Gets the voter
+     * @dev Only the campain manager can call this function
      * @param _voterAddress The address of the voter
      * @return The name of the voter
      * @return The id of the voter
@@ -147,6 +153,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Gets the voters list
+     * @dev Only the campain manager can call this function
      * @return The list of voters
      */
     function getVoters() public view onlyRole(CAMPAIN_MANAGER) returns (address[] memory) {
@@ -163,6 +170,7 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
 
     /**
      * @notice Gets the number of voters
+     * @dev Only the campain manager can call this function
      * @return The number of voters
      */
     function getVoterCount() public view onlyRole(CAMPAIN_MANAGER) returns (uint256) {

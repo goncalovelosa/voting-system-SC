@@ -22,6 +22,12 @@ interface IElection is ElectionStructs {
     event VotingPeriodSet(uint32 _start, uint32 _end);
 
     /**
+     * @notice Initializes the election
+     * @param _initData The init data
+     */
+    function initialize(ElectionInitData calldata _initData) external;
+
+    /**
      * @notice Registers a voter
      * @param _name The name of the voter
      * @param _id The id of the voter
