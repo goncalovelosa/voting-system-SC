@@ -17,15 +17,27 @@ contract Forwarder is IForwarder, OwnableUpgradeable, EIP712Upgradeable {
     mapping(address => uint256) private _nonces;
     address private _trustedSigner;
 
-    event Forwarded(address indexed sender, address indexed destination, uint256 value, bytes data);
-    event BatchForwarded(address indexed sender, address[] destinations, uint256[] values, bytes[] data);
-
+    /**
+     * @notice Initializes the contract.
+     * @dev This function should be called exactly once.
+     * @param trustedSigner The address that is allowed to sign transactions on behalf of the forwarder.
+     */
     function initialize(address trustedSigner) public initializer {
         __Ownable_init();
         __EIP712_init("Forwarder", "1");
         _trustedSigner = trustedSigner;
     }
 
+    /**
+     * @notice Forwards a transaction.
+     * @dev The transaction must be signed by the trusted signer.
+     * @param to The address the transaction is forwarded to.
+     * @param value The amount of ETH to be forwarded.
+     * @param data The data of the transaction.
+     * @param gasPrice The gas price of the transaction.
+     * @param gasLimit The gas limit of the transaction.
+     * @param signature The signature of the transaction.
+     */
     function forward(
         address to,
         uint256 value,
@@ -62,6 +74,16 @@ contract Forwarder is IForwarder, OwnableUpgradeable, EIP712Upgradeable {
         emit Forwarded(msg.sender, to, value, data);
     }
 
+    /**
+     * @notice Forwards multiple transactions.
+     * @dev The transactions must be signed by the trusted signer.
+     * @param destinations Destination addresses
+     * @param values The Value of the transaction.
+     * @param data The data of the transaction.
+     * @param gasPrice The gas price of the transaction.
+     * @param gasLimit The gas limit of the transaction.
+     * @param signatures The signatures of the transactions.
+     */
     function batchForward(
         address[] memory destinations,
         uint256[] memory values,
@@ -84,14 +106,28 @@ contract Forwarder is IForwarder, OwnableUpgradeable, EIP712Upgradeable {
         emit BatchForwarded(msg.sender, destinations, values, data);
     }
 
+    /**
+     * @notice Gets the nonce of an account.
+     * @param owner The address of the account that owns the nonce.
+     * @return The nonce of the account.
+     */
     function getNonce(address owner) public view returns (uint256) {
         return _nonces[owner];
     }
 
+    /**
+     * @notice Gets the trusted signer.
+     * @return The trusted signer.
+     */
     function getTrustedSigner() public view returns (address) {
         return _trustedSigner;
     }
 
+    /**
+     * @notice Sets the trusted signer.
+     * @dev Only the owner can call this function.
+     * @param trustedSigner The new trusted signer.
+     */
     function setTrustedSigner(address trustedSigner) public onlyOwner {
         _trustedSigner = trustedSigner;
     }
