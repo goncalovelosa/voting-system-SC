@@ -25,4 +25,8 @@ interface IForwarder {
     function getTrustedSigner() external view returns (address);
 
     function setTrustedSigner(address trustedSigner) external;
+
+    event Forwarded(address indexed sender, address indexed destination, uint256 value, bytes data);
+
+    event BatchForwarded(address indexed sender, address[] destinations, uint256[] values, bytes[] data);
 }
