@@ -26,6 +26,8 @@
   "homepage": "https://github.com/goncalovelosa/voting-system-SC#readme",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-solhint": "^3.0.1",
     "@typechain/ethers-v5": "^10.2.1",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",

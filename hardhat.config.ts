@@ -2,6 +2,8 @@
 import 'dotenv/config'
 
 import '@nomicfoundation/hardhat-toolbox'
+import '@nomiclabs/hardhat-ethers'
+import '@nomiclabs/hardhat-solhint'
 import 'hardhat-contract-sizer'
 import '@openzeppelin/hardhat-upgrades'
 
