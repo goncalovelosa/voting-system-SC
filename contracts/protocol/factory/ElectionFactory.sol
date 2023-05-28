@@ -10,7 +10,7 @@ import "../election/Election.sol";
 import "../interfaces/IElection.sol";
 import "../interfaces/IElectionsFactory.sol";
 
-contract ElectionFactory is IElectionsFactory, Ownable, ERC2771Context {
+contract ElectionFactory is IElectionsFactory, ERC2771Context, Ownable {
     address[] public elections;
     address public electionImplementation;
 

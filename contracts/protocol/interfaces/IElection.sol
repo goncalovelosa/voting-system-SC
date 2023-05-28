@@ -100,4 +100,6 @@ interface IElection is ElectionStructs {
      * @param _end The end of the voting period
      */
     function setVotingPeriod(uint32 _start, uint32 _end) external;
+
+    function isTrustedForwarder(address forwarder) external view returns (bool);
 }

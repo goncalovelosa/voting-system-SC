@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ERC2771ContextUpgradeable, ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 
-contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, ERC2771ContextUpgradeable {
+contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, AccessControlUpgradeable {
     mapping(address => Voter) private voters;
     mapping(address => Candidate) private candidates;
     address[] private votersList;
@@ -190,6 +190,12 @@ contract Election is IElection, PausableUpgradeable, AccessControlUpgradeable, E
         bytes4 interfaceId
     ) public view virtual override(AccessControlUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function isTrustedForwarder(
+        address forwarder
+    ) public view virtual override(IElection, ERC2771ContextUpgradeable) returns (bool) {
+        return ERC2771ContextUpgradeable.isTrustedForwarder(forwarder);
     }
 
     function _setVotingPeriod(uint32 _start, uint32 _end) internal {
