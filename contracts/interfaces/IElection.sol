@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "../ElectionStructs.sol";
+import { ElectionStructs } from "../ElectionStructs.sol";
 
 interface IElection is ElectionStructs {
     /**

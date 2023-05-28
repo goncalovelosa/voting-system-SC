@@ -5,10 +5,10 @@ pragma solidity ^0.8.18;
 import { ERC2771Context, Context } from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
-import "../ElectionStructs.sol";
-import "../election/Election.sol";
-import "../interfaces/IElection.sol";
-import "../interfaces/IElectionsFactory.sol";
+import { ElectionStructs } from "../ElectionStructs.sol";
+import { Election } from "../election/Election.sol";
+import { IElection } from "../interfaces/IElection.sol";
+import { IElectionsFactory } from "../interfaces/IElectionsFactory.sol";
 
 contract ElectionFactory is IElectionsFactory, ERC2771Context, Ownable {
     address[] public elections;

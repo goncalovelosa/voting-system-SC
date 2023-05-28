@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import "../interfaces/IElection.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { IElection } from "../interfaces/IElection.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ERC2771ContextUpgradeable, ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 
 contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, AccessControlUpgradeable {
