@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import { IAccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+
 import { ElectionStructs } from "../ElectionStructs.sol";
 
-interface IElection is ElectionStructs {
+interface IElection is ElectionStructs, IAccessControlUpgradeable {
     /**
      * @notice Emitted when a voter is registered
      */
