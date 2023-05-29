@@ -14,7 +14,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
     address[] private candidatesList;
     Period private votingPeriod;
 
-    bytes32 public constant CAMPAIN_MANAGER = keccak256("CAMPAIN_MANAGER");
+    bytes32 public constant CAMPAIGN_MANAGER = keccak256("CAMPAIGN_MANAGER");
     bytes32 public constant VOTING_MANAGER = keccak256("VOTING_MANAGER");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -31,13 +31,15 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
-        _setRoleAdmin(VOTING_MANAGER, CAMPAIN_MANAGER);
+        _setRoleAdmin(VOTING_MANAGER, CAMPAIGN_MANAGER);
         require(_initData.campainManagers.length > 0, "At least one campain manager is required");
         for (uint256 i = 0; i < _initData.campainManagers.length; i++) {
-            _grantRole(CAMPAIN_MANAGER, _initData.campainManagers[i]);
+            require(_initData.campainManagers[i] != address(0), "Campain manager cannot be zero address");
+            _grantRole(CAMPAIGN_MANAGER, _initData.campainManagers[i]);
         }
         require(_initData.votingManagers.length > 0, "At least one voting manager is required");
         for (uint256 i = 0; i < _initData.votingManagers.length; i++) {
+            require(_initData.votingManagers[i] != address(0), "Voting manager cannot be zero address");
             _grantRole(VOTING_MANAGER, _initData.votingManagers[i]);
         }
         require(_initData.start < _initData.end, "Start date must be before end date");
@@ -50,7 +52,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
      * @param _start The start of the voting period
      * @param _end The end of the voting period
      */
-    function setVotingPeriod(uint32 _start, uint32 _end) external onlyRole(CAMPAIN_MANAGER) {
+    function setVotingPeriod(uint32 _start, uint32 _end) external onlyRole(CAMPAIGN_MANAGER) {
         _setVotingPeriod(_start, _end);
     }
 
@@ -102,7 +104,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
     function registerCandidate(
         string memory _name,
         address _candidateAddress
-    ) external override whenNotPaused onlyRole(CAMPAIN_MANAGER) returns (bool) {
+    ) external override whenNotPaused onlyRole(CAMPAIGN_MANAGER) returns (bool) {
         require(candidates[_candidateAddress].votes == 0, "Candidate already registered");
         require(_candidateAddress != address(0), "Candidate address cannot be 0");
         require(bytes(_name).length > 0, "Candidate name cannot be empty");
@@ -137,7 +139,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
      */
     function getVoter(
         address _voterAddress
-    ) public view override onlyRole(CAMPAIN_MANAGER) returns (string memory, string memory, bool) {
+    ) public view override onlyRole(CAMPAIGN_MANAGER) returns (string memory, string memory, bool) {
         return (voters[_voterAddress].name, voters[_voterAddress].id, voters[_voterAddress].voted);
     }
 
@@ -156,7 +158,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
      * @dev Only the campain manager can call this function
      * @return The list of voters
      */
-    function getVoters() public view onlyRole(CAMPAIN_MANAGER) returns (address[] memory) {
+    function getVoters() public view onlyRole(CAMPAIGN_MANAGER) returns (address[] memory) {
         return votersList;
     }
 
@@ -173,7 +175,7 @@ contract Election is IElection, ERC2771ContextUpgradeable, PausableUpgradeable, 
      * @dev Only the campain manager can call this function
      * @return The number of voters
      */
-    function getVoterCount() public view onlyRole(CAMPAIN_MANAGER) returns (uint256) {
+    function getVoterCount() public view onlyRole(CAMPAIGN_MANAGER) returns (uint256) {
         return votersList.length;
     }
 
